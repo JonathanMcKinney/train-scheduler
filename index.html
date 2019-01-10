@@ -87,6 +87,7 @@
             storageBucket: "first-database-8377b.appspot.com",
             messagingSenderId: "862983536564"
         };
+
         firebase.initializeApp(config);
 
         var database = firebase.database();
@@ -109,9 +110,6 @@
 
             validateForm();
 
-
-
-
             var newTrain = {
                 name: name,
                 destination: destination,
@@ -120,16 +118,12 @@
             }
 
             database.ref("/trainSchedule").push(newTrain);
-
             $("#trainName").val("");
             $("#trainDestination").val("");
             $("#trainTime").val("");
             $("#trainRate").val("");
-
-
-
-
         });
+
         database.ref("/trainSchedule").on("child_added", function (input) {
 
             var currentTime = moment();
@@ -137,7 +131,7 @@
             var diffTime = moment().diff(moment(firstTimeRecall), "minutes");
             var tRemainder = diffTime % input.val().frequency;
             var tTill = input.val().frequency - tRemainder;
-            var nextTrain = moment().add(tTill, "minutes").format("hh:mm:ss a");
+            var nextTrain = moment().add(tTill, "minutes").format("hh:mm a");
             console.log(diffTime);
             console.log(input.val().firstTime);
 

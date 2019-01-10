@@ -1,0 +1,21 @@
+body {
+    background-color: white;
+}
+
+.jumbotron{
+    background-color: white;
+    font-family: 'Times New Roman', Times, serif;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+h1 {
+    font-size: 4em;
+}
+
+#cardSchedule {
+    background-image: url(../images/station.jpg);
+    color: white;
+    
+}
+

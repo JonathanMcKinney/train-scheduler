@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Train Scheduler</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+        crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
+
+    <!-- Moment JS -->
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
+
+</head>
+
+<body>
+
+    <div class="container">
+        <header class="jumbotron">
+            <h1>All Aboard!</h1>
+            <p class="lead">Let's see where we're going.</p>
+        </header>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Train Schedule</div>
+            <div class="card-body">
+                <table class="table">
+                    <tr class="table-head">
+                        <th>Train Name</th>
+                        <th>Destination</th>
+                        <th>Frequency (min)</th>
+                        <th>Next Arrival</th>
+                        <th>Minutes Away</th>
+                    </tr>
+                </table>
+            </div>
+        </div><br>
+
+        <div class="card">
+            <div class="card-header">Add a Train</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="name">Train Name: </label>
+                    <input type="name" class="form-control" id="trainName" placeholder="Enter Train Name">
+                </div>
+                <div class="form-group">
+                    <label for="name">Destination: </label>
+                    <input type="name" class="form-control" id="trainDestination" placeholder="Enter Destination">
+                </div>
+                <div class="form-group">
+                    <label for="name">First Train Time (HH:mm - military time): </label>
+                    <input type="name" class="form-control" id="trainTime" placeholder="Enter first Departure">
+                </div>
+                <div class="form-group">
+                    <label for="name">Frequency (min): </label>
+                    <input type="name" class="form-control" id="trainRate" placeholder="Enter Frequency">
+                </div>
+                <button type="submit" class="btn btn-primary" id="addTrain">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBMRFD4PHgQejFXwW7dRytX1IymbtAawFU",
+            authDomain: "first-database-8377b.firebaseapp.com",
+            databaseURL: "https://first-database-8377b.firebaseio.com",
+            projectId: "first-database-8377b",
+            storageBucket: "first-database-8377b.appspot.com",
+            messagingSenderId: "862983536564"
+        };
+        firebase.initializeApp(config);
+
+        var database = firebase.database();
+
+
+        $("#addTrain").on("click", function (event) {
+            event.preventDefault();
+
+            var name = $("#trainName").val().trim();
+            var destination = $("#trainDestination").val().trim();
+            var firstTime = $("#trainTime").val().trim();
+            var frequency = $("#trainRate").val().trim();
+
+            function validateForm() {
+                if (name === "" || destination === "" || firstTime === "" || frequency === "") {
+                    alert("please complete the missing field");
+                    return;
+                }
+            }
+
+            validateForm();
+
+
+
+
+            var newTrain = {
+                name: name,
+                destination: destination,
+                firstTime: firstTime,
+                frequency: frequency
+            }
+
+            database.ref("/trainSchedule").push(newTrain);
+
+            $("#trainName").val("");
+            $("#trainDestination").val("");
+            $("#trainTime").val("");
+            $("#trainRate").val("");
+
+
+
+
+        });
+        database.ref("/trainSchedule").on("child_added", function (input) {
+
+            var currentTime = moment();
+            var firstTimeRecall = moment(input.val().firstTime, "HH:mm").subtract(1, "years");
+            var diffTime = moment().diff(moment(firstTimeRecall), "minutes");
+            var tRemainder = diffTime % input.val().frequency;
+            var tTill = input.val().frequency - tRemainder;
+            var nextTrain = moment().add(tTill, "minutes").format("hh:mm:ss a");
+            console.log(diffTime);
+            console.log(input.val().firstTime);
+
+            var newRow = $("<tr>").append(
+                $("<td>").text(input.val().name),
+                $("<td>").text(input.val().destination),
+                $("<td>").text(input.val().frequency),
+                $("<td>").text(nextTrain),
+                $("<td>").text(tTill)
+
+            );
+
+            $(".table").append(newRow);
+        });
+
+    </script>
+
+
+
+</body>
+
+</html>
